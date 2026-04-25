@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Huffman Coding — DAA Unit 3</title>
+<meta name="description" content="Interactive Huffman Coding visualizer — WhatsApp Compression Case Study. Design Analysis & Algorithms Unit 3.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- PAGE 1 -->
+<div id="page1" class="page active">
+  <div class="content-col" style="max-width:900px">
+    <header class="site-header">
+      <div class="unit-label">Design Analysis &amp; Algorithms — Unit 3: Greedy Algorithms</div>
+      <h1 class="main-title">Huffman Coding</h1>
+      <p class="subtitle">WhatsApp Compression Case Study</p>
+      <div class="team-card">
+        <div class="team-member"><span class="name">Nabanshu Barman</span><span class="roll">RA2411026010014</span></div>
+        <div class="team-member"><span class="name">Yadhisresht Harikrishnan</span><span class="roll">RA2411026010011</span></div>
+        <div class="team-member"><span class="name">Devanath Sugavasi</span><span class="roll">RA2411026010034</span></div>
+      </div>
+    </header>
+
+    <div class="code-panel">
+      <div class="code-panel-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span class="code-filename">huffman.c</span>
+        <span class="code-lang-tag">C</span>
+      </div>
+      <div class="code-scroll-area">
+        <table class="code-table" id="codeTable"></table>
+      </div>
+    </div>
+
+    <div class="run-btn-wrap">
+      <button id="runBtn" class="run-btn" onclick="goToPage2()">
+        <span>RUN</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2 -->
+<div id="page2" class="page">
+  <div class="content-col" style="max-width:1000px">
+    <div class="back-link-wrap">
+      <a href="#" class="back-link" onclick="goToPage1(); return false;">← Back to Code</a>
+    </div>
+
+    <div class="p2-header">
+      <div class="unit-label">Huffman Coding — Interactive Output</div>
+      <h2 class="p2-title">Live Compression Visualizer</h2>
+    </div>
+
+    <!-- Input Section -->
+    <div class="input-section card">
+      <label class="input-label" for="msgInput">Enter your message:</label>
+      <div class="input-row">
+        <input type="text" id="msgInput" class="msg-input" placeholder="see you at the store" autocomplete="off" spellcheck="false">
+        <button class="compress-btn" id="compressBtn" onclick="runHuffman()">Compress →</button>
+      </div>
+    </div>
+
+    <!-- Output (hidden until compress) -->
+    <div id="outputArea" class="output-area hidden">
+      <!-- Stats -->
+      <div class="stats-row" id="statsRow"></div>
+      <!-- Table -->
+      <div class="section-block card" id="tableSection">
+        <div class="section-title">Huffman Code Table</div>
+        <div class="table-wrap">
+          <table class="huff-table" id="huffTable">
+            <thead><tr>
+              <th>Character</th><th>Frequency</th><th>Huffman Code</th><th>Huffman Bits</th><th>ASCII Bits</th>
+            </tr></thead>
+            <tbody id="huffTbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Bitstream -->
+      <div class="section-block card" id="bitstreamSection">
+        <div class="section-title">Encoded Bitstream</div>
+        <div class="bitstream-label">Encoded Bitstream:</div>
+        <div class="bitstream-display" id="bitstreamDisplay"></div>
+        <div class="bitstream-total" id="bitstreamTotal"></div>
+      </div>
+      <!-- Tree -->
+      <div class="section-block card" id="treeSection">
+        <div class="section-title">Huffman Tree Visualisation</div>
+        <div class="tree-container" id="treeContainer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tooltip -->
+<div id="tooltip" class="tooltip hidden"></div>
+
+<script src="huffman.js"></script>
+<script src="tree.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
