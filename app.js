@@ -27,120 +27,174 @@ function goToPage1() {
 
 // ===== SYNTAX HIGHLIGHTED CODE =====
 const C_CODE = `#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdio.h>      // standard input/output (printf, fgets)
+#include <stdlib.h>     // memory allocation (malloc)
+#include <string.h>     // string functions (strlen, strcpy, strcspn)
 
-#define MAX_CHAR 256
-#define MAX_CODE_LEN 100
+#define MAX_CHAR 256        // total possible ASCII characters
+#define MAX_CODE_LEN 100    // max length of any Huffman code
 
+// Node of Huffman Tree
 typedef struct Node {
-    char ch;
-    int freq;
-    struct Node *left, *right;
+    char ch;                // character stored (leaf nodes only meaningful)
+    int freq;               // frequency of the character
+    struct Node *left, *right; // left and right children
 } Node;
 
+// Min Heap structure (priority queue based on frequency)
 typedef struct {
-    int size;
-    Node* arr[MAX_CHAR];
+    int size;               // current number of elements in heap
+    Node* arr[MAX_CHAR];    // array of pointers to nodes
 } MinHeap;
 
+// Stores final Huffman codes
 typedef struct {
-    char ch;
-    char code[MAX_CODE_LEN];
-    int len;
+    char ch;                    // character
+    char code[MAX_CODE_LEN];    // binary code string
+    int len;                    // length of code
 } CodeEntry;
 
+// Global table to store all character codes
 CodeEntry code_table[MAX_CHAR];
-int code_table_size = 0;
+int code_table_size = 0;        // tracks number of entries
 
+// Create a new tree node
 Node* create_node(char ch, int freq) {
-    Node* n = (Node*)malloc(sizeof(Node));
-    n->ch = ch;
-    n->freq = freq;
-    n->left = n->right = NULL;
-    return n;
+    Node* n = (Node*)malloc(sizeof(Node)); // allocate memory for node
+    n->ch = ch;            // assign character
+    n->freq = freq;        // assign frequency
+    n->left = n->right = NULL; // initialize children as NULL
+    return n;              // return pointer to node
 }
 
+// Swap two node pointers (used in heap operations)
 void swap(Node** a, Node** b) {
-    Node* t = *a; *a = *b; *b = t;
+    Node* t = *a;          // store first pointer temporarily
+    *a = *b;               // assign second to first
+    *b = t;                // assign temp to second
 }
 
+// Maintain min-heap property starting from index i
 void heapify(MinHeap* h, int i) {
-    int smallest = i;
-    int l = 2*i+1, r = 2*i+2;
+    int smallest = i;              // assume current node is smallest
+    int l = 2*i+1, r = 2*i+2;      // left and right child indices
+
+    // check if left child exists and is smaller
     if (l < h->size && h->arr[l]->freq < h->arr[smallest]->freq)
         smallest = l;
+
+    // check if right child exists and is smaller
     if (r < h->size && h->arr[r]->freq < h->arr[smallest]->freq)
         smallest = r;
+
+    // if smallest is not the current node, swap and recurse
     if (smallest != i) {
         swap(&h->arr[i], &h->arr[smallest]);
-        heapify(h, smallest);
+        heapify(h, smallest);  // recursively fix subtree
     }
 }
 
+// Remove and return the node with minimum frequency
 Node* extract_min(MinHeap* h) {
-    Node* temp = h->arr[0];
-    h->arr[0] = h->arr[--h->size];
-    heapify(h, 0);
-    return temp;
+    Node* temp = h->arr[0];         // root is minimum
+    h->arr[0] = h->arr[--h->size];  // replace root with last element
+    heapify(h, 0);                 // restore heap property
+    return temp;                   // return smallest node
 }
 
+// Insert a new node into the heap
 void insert_heap(MinHeap* h, Node* n) {
-    int i = h->size++;
+    int i = h->size++;     // insert at end, then fix upward
     h->arr[i] = n;
+
+    // move up while parent is larger
     while (i && h->arr[i]->freq < h->arr[(i-1)/2]->freq) {
         swap(&h->arr[i], &h->arr[(i-1)/2]);
-        i = (i-1)/2;
+        i = (i-1)/2;       // move to parent index
     }
 }
 
+// Build Huffman Tree using frequency array
 Node* build_tree(int freq[]) {
-    MinHeap h = {0};
+    MinHeap h = {0};   // initialize heap with size = 0
+
+    // Step 1: create leaf nodes for each character
     for (int i = 0; i < MAX_CHAR; i++)
-        if (freq[i] > 0)
+        if (freq[i] > 0)  // only include characters that appear
             h.arr[h.size++] = create_node(i, freq[i]);
+
+    // Step 2: build initial heap (bottom-up heapify)
     for (int i = h.size/2 - 1; i >= 0; i--)
         heapify(&h, i);
+
+    // Step 3: repeatedly combine two smallest nodes
     while (h.size > 1) {
-        Node* left = extract_min(&h);
-        Node* right = extract_min(&h);
+        Node* left = extract_min(&h);    // smallest node
+        Node* right = extract_min(&h);   // second smallest
+
+        // create new internal node (no character, use '$')
         Node* merged = create_node('$', left->freq + right->freq);
-        merged->left = left;
-        merged->right = right;
-        insert_heap(&h, merged);
+
+        merged->left = left;     // attach left subtree
+        merged->right = right;   // attach right subtree
+
+        insert_heap(&h, merged); // insert back into heap
     }
-    return extract_min(&h);
+
+    return extract_min(&h);  // final node = root of Huffman tree
 }
 
+// Recursively generate Huffman codes
 void generate_codes(Node* root, char* code, int depth) {
-    if (!root) return;
+    if (!root) return;   // base case: null node
+
+    // if leaf node → assign code
     if (!root->left && !root->right) {
-        code[depth] = '\\0';
-        code_table[code_table_size].ch = root->ch;
-        strcpy(code_table[code_table_size].code, code);
-        code_table[code_table_size].len = depth;
-        code_table_size++;
+        code[depth] = '\0';   // terminate string
+
+        code_table[code_table_size].ch = root->ch;     // store character
+        strcpy(code_table[code_table_size].code, code); // store code string
+        code_table[code_table_size].len = depth;       // store length
+
+        code_table_size++;    // move to next slot
         return;
     }
+
+    // go left → add '0'
     code[depth] = '0';
     generate_codes(root->left, code, depth + 1);
+
+    // go right → add '1'
     code[depth] = '1';
     generate_codes(root->right, code, depth + 1);
 }
 
 int main() {
-    char input[1000];
-    int freq[MAX_CHAR] = {0};
+    char input[1000];             // input string
+    int freq[MAX_CHAR] = {0};     // frequency array initialized to 0
+
     printf("Enter message: ");
-    fgets(input, sizeof(input), stdin);
-    input[strcspn(input, "\\n")] = 0;
+    fgets(input, sizeof(input), stdin);   // read input including spaces
+
+    // remove trailing newline character
+    input[strcspn(input, "\n")] = 0;
+
+    // count frequency of each character
     for (int i = 0; input[i]; i++)
         freq[(unsigned char)input[i]]++;
+
+    // original size in bits (8 bits per character)
     int ascii_total = strlen(input) * 8;
+
+    // build Huffman Tree
     Node* root = build_tree(freq);
-    char code[MAX_CODE_LEN];
+
+    char code[MAX_CODE_LEN];   // temporary buffer for codes
+
+    // generate Huffman codes from tree
     generate_codes(root, code, 0);
-    // Output: code table + compression stats
+
+    // Output part missing: should print codes + compression stats
     return 0;
 }`;
 
